@@ -2,8 +2,10 @@ package main
 
 import (
 	"crypto/md5"
+	"encoding/json"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"strconv"
 	"strings"
 )
@@ -162,12 +164,44 @@ func (b *board) ppath() string {
 	return strings.Join(steps, ", ")
 }
 
+func interpret(ds map[int][]string) *board {
+	colors := map[string]byte{}
+	var nextColor byte
+	b := &board{}
+	for i := 1; i <= len(ds); i++ {
+		cnames := ds[i]
+		t := tube{}
+		for _, color := range cnames {
+			if _, ok := colors[color]; !ok {
+				colors[color] = nextColor
+				nextColor++
+			}
+			t.items = append(t.items, colors[color])
+		}
+		b.tubes = append(b.tubes, t)
+	}
+	return b
+}
+
 func main() {
+	data, err := ioutil.ReadFile("test.js")
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	fmt.Println(string(data))
+	ds := map[int][]string{}
+	if err := json.Unmarshal(data, &ds); err != nil {
+		fmt.Println(err)
+		return
+	}
+	fmt.Println(interpret(ds))
+	return
 	b := &board{
 		tubes: []tube{
-			tube{items: []byte{1, 1, 2, 2}},
-			tube{items: []byte{2, 2, 1, 1}},
-			tube{items: []byte{}},
+			tube{items: []byte{0, 1, 2, 3}},
+			tube{items: []byte{4, 5, 6, 7}},
+			tube{items: []byte{6, 0}},
 		},
 	}
 	fmt.Println(b)
