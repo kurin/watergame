@@ -15,19 +15,19 @@ func TestTopN(t *testing.T) {
 			n:    0,
 		},
 		{
-			tube: tube{items: []color{1, 2, 3, 3}},
+			tube: tube{items: []byte{1, 2, 3, 3}},
 			n:    2,
 		},
 		{
-			tube: tube{items: []color{1, 3, 3, 3}},
+			tube: tube{items: []byte{1, 3, 3, 3}},
 			n:    3,
 		},
 		{
-			tube: tube{items: []color{3, 3, 3, 3}},
+			tube: tube{items: []byte{3, 3, 3, 3}},
 			n:    4,
 		},
 		{
-			tube: tube{items: []color{3, 3, 3, 4}},
+			tube: tube{items: []byte{3, 3, 3, 4}},
 			n:    1,
 		},
 	}
@@ -45,22 +45,22 @@ func TestPour(t *testing.T) {
 		wf, wt   tube
 	}{
 		{
-			from: tube{items: []color{1, 1, 2, 3}},
-			to:   tube{items: []color{2, 2, 3}},
-			wf:   tube{items: []color{1, 1, 2}},
-			wt:   tube{items: []color{2, 2, 3, 3}},
+			from: tube{items: []byte{1, 1, 2, 3}},
+			to:   tube{items: []byte{2, 2, 3}},
+			wf:   tube{items: []byte{1, 1, 2}},
+			wt:   tube{items: []byte{2, 2, 3, 3}},
 		},
 		{
-			from: tube{items: []color{1, 1, 0, 0}},
-			to:   tube{items: []color{}},
-			wf:   tube{items: []color{1, 1}},
-			wt:   tube{items: []color{0, 0}},
+			from: tube{items: []byte{1, 1, 0, 0}},
+			to:   tube{items: []byte{}},
+			wf:   tube{items: []byte{1, 1}},
+			wt:   tube{items: []byte{0, 0}},
 		},
 		{
-			from: tube{items: []color{1, 1, 1}},
-			to:   tube{items: []color{0, 0, 1}},
-			wf:   tube{items: []color{1, 1}},
-			wt:   tube{items: []color{0, 0, 1, 1}},
+			from: tube{items: []byte{1, 1, 1}},
+			to:   tube{items: []byte{0, 0, 1}},
+			wf:   tube{items: []byte{1, 1}},
+			wt:   tube{items: []byte{0, 0, 1, 1}},
 		},
 	}
 

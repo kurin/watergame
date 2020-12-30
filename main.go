@@ -1,15 +1,19 @@
 package main
 
 import (
+	"crypto/md5"
 	"fmt"
+	"io"
 	"strconv"
 	"strings"
 )
 
-type color int
-
 type tube struct {
-	items []color
+	items []byte
+}
+
+func (t tube) hash(w io.Writer) {
+	w.Write(t.items)
 }
 
 func (t tube) room(o tube) bool {
@@ -48,7 +52,7 @@ func (t tube) pour(o tube) (tube, tube) {
 	i := len(t.items) - n
 
 	newFrom := t.items[:i]
-	newTo := make([]color, len(o.items)+n)
+	newTo := make([]byte, len(o.items)+n)
 	copy(newTo, o.items)
 	copy(newTo[len(o.items):], t.items[i:])
 
@@ -59,7 +63,7 @@ func (t tube) done() bool {
 	if len(t.items) == 0 {
 		return true
 	}
-	var v color
+	var v byte
 	for i := range t.items {
 		if i == 0 {
 			v = t.items[i]
@@ -78,11 +82,14 @@ type pour struct {
 type board struct {
 	path  []pour
 	tubes []tube
+
+	visited bool
+	dist    int
 }
 
 func (b *board) win() bool {
 	for _, t := range b.tubes {
-		if !t.done() {
+		if !t.done() || len(t.items) != 4 {
 			return false
 		}
 	}
@@ -106,6 +113,15 @@ func (b *board) pour(i, j int) (*board, bool) {
 	nb.path = append(nb.path, pour{from: i, to: j})
 	nb.tubes[i], nb.tubes[j] = tl.pour(tr)
 	return nb, true
+}
+
+func (b *board) hash() []byte {
+	h := md5.New()
+	for i, t := range b.tubes {
+		h.Write([]byte{byte(i)})
+		t.hash(h)
+	}
+	return h.Sum(nil)
 }
 
 func (b *board) neighbors() []*board {
@@ -147,14 +163,16 @@ func (b *board) ppath() string {
 func main() {
 	b := &board{
 		tubes: []tube{
-			tube{items: []color{3, 3, 3}},
-			tube{items: []color{0, 0, 3}},
-			tube{items: []color{4}},
+			tube{items: []byte{1, 1, 2, 2}},
+			tube{items: []byte{2, 2, 1, 1}},
+			tube{items: []byte{}},
 		},
 	}
-	fmt.Println(b, b.win())
-	bs := b.neighbors()
-	for _, b := range bs {
-		fmt.Println(b.ppath(), b, b.win())
+	fmt.Println(b)
+	out := dijkstra(b)
+	if out == nil {
+		fmt.Println("failure")
+		return
 	}
+	fmt.Println(out.ppath(), out)
 }
