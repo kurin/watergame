@@ -2,6 +2,8 @@ package main
 
 import (
 	"container/heap"
+	"fmt"
+	"math/rand"
 )
 
 func (b *board) depth() int { return len(b.path) }
@@ -10,8 +12,6 @@ type boards struct {
 	boards []*board
 }
 
-//func (b *boards) seen
-
 func (b *boards) Push(x interface{}) {
 	xx := x.(*board)
 	b.boards = append(b.boards, xx)
@@ -19,6 +19,7 @@ func (b *boards) Push(x interface{}) {
 
 func (b *boards) Pop() interface{} {
 	xx := b.boards[len(b.boards)-1]
+	b.boards[len(b.boards)-1] = nil
 	b.boards = b.boards[:len(b.boards)-1]
 	return xx
 }
@@ -30,8 +31,13 @@ func (b *boards) Less(i, j int) bool { return b.boards[i].depth() < b.boards[j].
 func dijkstra(init *board) *board {
 	unvisited := &boards{}
 	heap.Push(unvisited, init)
-	seen := map[[16]byte]struct{}{}
+	seen := map[[12]byte]struct{}{}
+	var i int
 	for {
+		i++
+		if i%10000 == 0 {
+			fmt.Println(unvisited.Len(), len(seen))
+		}
 		if unvisited.Len() == 0 {
 			return nil
 		}
@@ -40,8 +46,10 @@ func dijkstra(init *board) *board {
 			return node
 		}
 		seen[node.hash()] = struct{}{}
-		for _, neighbor := range node.neighbors() {
-			if _, ok := seen[neighbor.hash()]; !ok {
+		ns := node.neighbors()
+		rand.Shuffle(len(ns), func(i, j int) { ns[i], ns[j] = ns[j], ns[i] })
+		for _, neighbor := range ns {
+			if _, ok := seen[neighbor.hash()]; !ok && unvisited.Len() < 60000 {
 				heap.Push(unvisited, neighbor)
 			}
 		}

@@ -117,13 +117,13 @@ func (b *board) pour(i, j int) (*board, bool) {
 	return nb, true
 }
 
-func (b *board) hash() [16]byte {
+func (b *board) hash() [12]byte {
 	h := md5.New()
 	for i, t := range b.tubes {
 		h.Write([]byte{byte(i)})
 		t.hash(h)
 	}
-	var out [16]byte
+	var out [12]byte
 	copy(out[:], h.Sum(nil))
 	return out
 }
@@ -195,15 +195,7 @@ func main() {
 		fmt.Println(err)
 		return
 	}
-	fmt.Println(interpret(ds))
-	return
-	b := &board{
-		tubes: []tube{
-			tube{items: []byte{0, 1, 2, 3}},
-			tube{items: []byte{4, 5, 6, 7}},
-			tube{items: []byte{6, 0}},
-		},
-	}
+	b := interpret(ds)
 	fmt.Println(b)
 	out := dijkstra(b)
 	if out == nil {
