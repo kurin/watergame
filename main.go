@@ -89,7 +89,7 @@ type board struct {
 
 func (b *board) win() bool {
 	for _, t := range b.tubes {
-		if !t.done() || len(t.items) != 4 {
+		if !t.done() || (len(t.items) > 0 && len(t.items) < 3) {
 			return false
 		}
 	}
@@ -115,13 +115,15 @@ func (b *board) pour(i, j int) (*board, bool) {
 	return nb, true
 }
 
-func (b *board) hash() []byte {
+func (b *board) hash() [16]byte {
 	h := md5.New()
 	for i, t := range b.tubes {
 		h.Write([]byte{byte(i)})
 		t.hash(h)
 	}
-	return h.Sum(nil)
+	var out [16]byte
+	copy(out[:], h.Sum(nil))
+	return out
 }
 
 func (b *board) neighbors() []*board {

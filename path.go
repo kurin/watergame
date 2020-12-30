@@ -1,6 +1,8 @@
 package main
 
-import "container/heap"
+import (
+	"container/heap"
+)
 
 func (b *board) depth() int { return len(b.path) }
 
@@ -26,10 +28,9 @@ func (b *boards) Swap(i, j int)      { b.boards[i], b.boards[j] = b.boards[j], b
 func (b *boards) Less(i, j int) bool { return b.boards[i].depth() < b.boards[j].depth() }
 
 func dijkstra(init *board) *board {
-	// this is not dijkstra yet, like at all
-	// (a) of all, it loops forever
 	unvisited := &boards{}
 	heap.Push(unvisited, init)
+	seen := map[[16]byte]struct{}{}
 	for {
 		if unvisited.Len() == 0 {
 			return nil
@@ -38,8 +39,11 @@ func dijkstra(init *board) *board {
 		if node.win() {
 			return node
 		}
+		seen[node.hash()] = struct{}{}
 		for _, neighbor := range node.neighbors() {
-			heap.Push(unvisited, neighbor)
+			if _, ok := seen[neighbor.hash()]; !ok {
+				heap.Push(unvisited, neighbor)
+			}
 		}
 	}
 }
